@@ -1,5 +1,8 @@
 Sets implemented in the rust type-system.
 
+[![Crates.io](https://img.shields.io/crates/v/type-sets)](https://crates.io/crates/type-sets)
+[![Documentation](https://docs.rs/type-sets/badge.svg)](https://docs.rs/type-sets)
+
 This crate allows you to create sets of types in the rust type-system. These sets can be compared using [`SubsetOf`] and [`SupersetOf`].
 
 This library was developed for use in [`meslin`](https://github.com/jvdwrf/Meslin), but is general enough that there might be other purposes as well.
