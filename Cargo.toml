@@ -1,0 +1,15 @@
+[package]
+name = "type-sets"
+version = "0.0.1"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+keywords = ["type-system", "sets", "type-sets", "type-level", "type"]
+categories = []
+description = "Sets implemented in the rust type-system"
+homepage = "https://github.com/jvdwrf/type-sets"
+repository = "https://github.com/jvdwrf/type-sets"
+readme = "../README.md"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
