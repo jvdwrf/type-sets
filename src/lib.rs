@@ -1,47 +1,61 @@
 #![doc = include_str!("../README.md")]
 
-use std::{any::TypeId, marker::PhantomData};
+use private::*;
+use std::any::TypeId;
+
+mod set;
+pub use set::*;
 
 /// Sets of types from 0 to 10 elements.
 pub mod sets;
 
+mod private {
+    pub trait SealedSupersetOf<T> {}
+    pub trait SealedSubsetOf<T> {}
+    pub trait SealedContains<T> {}
+    pub trait SealedMembers {}
+}
+
+//-------------------------------------
+// Contains
+//-------------------------------------
+
 /// Indicates that a set contains element `E`.
-pub trait Contains<E> {}
+///
+/// This trait is sealed, implemente [`AsSet`] instead.
+pub trait Contains<E>: SealedContains<E> {}
+
+// Implement Contains for `Set<dyn ..>`
 impl<T: ?Sized, E> Contains<E> for Set<T> where T: Contains<E> {}
+impl<T: ?Sized, E> SealedContains<E> for Set<T> where T: Contains<E> {}
 
-/// Trait to get the members (type-ids) of a set.
-pub trait Members {
-    /// Get the members (type-ids) of this set.
-    fn members() -> &'static [TypeId];
-}
-
-/// Implemented if set is a subset of `S`.
-pub trait SubsetOf<S> {}
-
-/// Implemented if set is a superset of `S`.
-pub trait SupersetOf<S> {}
-impl<T, S> SupersetOf<S> for T where S: SubsetOf<T> {}
-
-/// Trait that allows usage of custom types as a set.
-pub trait AsSet {
-    /// The [`struct@Set`] type.
-    type Set: Members;
-}
-
-impl<T, S> SubsetOf<S> for T
-where
-    T: AsSet,
-    T::Set: SubsetOf<S>,
-{
-}
-
+// Implement Contains for `impl AsSet`
 impl<T, E> Contains<E> for T
 where
     T: AsSet,
     T::Set: Contains<E>,
 {
 }
+impl<T, E> SealedContains<E> for T
+where
+    T: AsSet,
+    T::Set: Contains<E>,
+{
+}
 
+//-------------------------------------
+// Members
+//-------------------------------------
+
+/// Trait to get the members (type-ids) of a set.
+///
+/// This trait is sealed, implement [`AsSet`] instead.
+pub trait Members: SealedMembers {
+    /// Get the members (type-ids) of this set.
+    fn members() -> &'static [TypeId];
+}
+
+// Implement Members for `impl AsSet`
 impl<T> Members for T
 where
     T: AsSet,
@@ -50,58 +64,52 @@ where
         <T::Set as Members>::members()
     }
 }
+impl<T> SealedMembers for T where T: AsSet {}
 
-/// Marker struct to act as a set of elements.
-///
-/// Usually created using the [`macro@Set`] macro.
-///
-/// The inner type `T` is usually one of the [`sets`]:
-/// - `Set![]` == `Set<dyn Zero>`
-/// - `Set![u32]` == `Set<dyn One<u32>>`
-/// - `Set![u32, u64]` == `Set<dyn Two<u32, u64>>`
-pub struct Set<T: ?Sized>(PhantomData<fn() -> T>);
+//-------------------------------------
+// SubsetOf
+//-------------------------------------
 
-/// Create a [`struct@Set`] from a list of types.
+/// Implemented if set is a subset of `S`.
 ///
-/// Example:
-/// - `Set![]` == `Set<dyn Zero>`
-/// - `Set![u32]` == `Set<dyn One<u32>>`
-/// - `Set![u32, u64]` == `Set<dyn Two<u32, u64>>`
-#[macro_export]
-macro_rules! Set {
-    ($(,)?) => {
-        $crate::Set<dyn $crate::sets::Zero>
-    };
-    ($t1:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::One<$t1>>
-    };
-    ($t1:ty, $t2:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Two<$t1, $t2>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Three<$t1, $t2, $t3>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Four<$t1, $t2, $t3, $t4>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Five<$t1, $t2, $t3, $t4, $t5>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty, $t6:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Six<$t1, $t2, $t3, $t4, $t5, $t6>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty, $t6:ty, $t7:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Seven<$t1, $t2, $t3, $t4, $t5, $t6, $t7>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty, $t6:ty, $t7:ty, $t8:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Eight<$t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty, $t6:ty, $t7:ty, $t8:ty, $t9:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Nine<$t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9>>
-    };
-    ($t1:ty, $t2:ty, $t3:ty, $t4:ty, $t5:ty, $t6:ty, $t7:ty, $t8:ty, $t9:ty, $t10:ty $(,)?) => {
-        $crate::Set<dyn $crate::sets::Ten<$t1, $t2, $t3, $t4, $t5, $t6, $t7, $t8, $t9, $t10>>
-    };
+/// This trait is sealed, implement [`AsSet`] instead.
+pub trait SubsetOf<S>: SealedSubsetOf<S> {}
+
+// Implement SubsetOf for `impl AsSet`
+impl<T, S> SubsetOf<S> for T
+where
+    T: AsSet,
+    T::Set: SubsetOf<S>,
+{
+}
+impl<T, S> SealedSubsetOf<S> for T
+where
+    T: AsSet,
+    T::Set: SubsetOf<S>,
+{
+}
+
+//-------------------------------------
+// SupersetOf
+//-------------------------------------
+
+/// Implemented if set is a superset of `S`.
+///
+/// This trait is sealed, implement [`AsSet`] instead.
+pub trait SupersetOf<S>: SealedSupersetOf<S> {}
+
+// Implement SupersetOf for `impl AsSet`
+impl<T, S> SupersetOf<S> for T where S: SubsetOf<T> {}
+impl<T, S> SealedSupersetOf<S> for T where S: SubsetOf<T> {}
+
+//-------------------------------------
+// AsSet
+//-------------------------------------
+
+/// Trait that allows usage of custom types instead of [`Set`].
+pub trait AsSet {
+    /// The [`struct@Set`] type.
+    type Set: Members;
 }
 
 #[cfg(test)]
@@ -116,11 +124,19 @@ mod tests {
 
     #[test]
     fn test() {
+        contains_string::<Set![String]>();
+        contains_string::<Set![String, u32]>();
+        contains_string::<Set![String, u32, u64]>();
+        contains_string::<Set![u32, u64, u128, String]>();
+        // contains_string::<MySet>(); // does not compile
+        // contains_string::<Set![u32]>(); // does not compile
+
         is_subset::<Set![u32, u64, u32, u32]>();
-        is_subset::<Set![u32]>();
-        is_subset::<Set![u64]>();
-        is_subset2::<Set![]>();
+        is_subset::<Set![u32, u64]>();
+        is_subset2::<Set![u32]>();
+        is_subset::<Set![]>();
         is_subset::<MySet>();
+        // is_subset::<Set![u32, u64, u128]>(); // does not compile
         // is_subset2::<MySet>(); // does not compile
         // is_subset::<Set![u32, u64, u128]>(); // does not compile
 
@@ -129,6 +145,26 @@ mod tests {
         is_superset1::<MySet>();
         // is_superset1::<Set![u32]>(); // does not compile
         // is_superset2::<MySet>(); // does not compile
+
+        let _: Set![];
+        let _: Set![u32];
+        let _: Set![u32, u64];
+        let _: Set![u32, u64, u128];
+        let _: Set![u32, u64, u128, u32];
+        let _: Set![u32, u64, u128, u32, u64];
+        let _: Set![u32, u64, u128, u32, u64, u128];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32, u64];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32, u64, u128];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32, u64, u128, u32];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32, u64, u128, u32, u64];
+        let _: Set![u32, u64, u128, u32, u64, u128, u32, u64, u128, u32, u64, u128];
+    }
+
+    fn contains_string<T>()
+    where
+        T: Contains<String>,
+    {
     }
 
     fn is_subset<T>()

@@ -10,13 +10,17 @@ macro_rules! create_sets {
             #[doc = concat!("A set containing ", $n, " types.")]
             ///
             /// This should not be implemented manually.
-            /// 
+            ///
             /// For easy usage, see the macro [`macro@Set`].
             pub trait $set<$($gen),*>: $($sub_sets +)* {}
             impl<$($gen,)* S: ?Sized> $set<$($gen),*> for S where S: $($sub_sets +)* {}
 
             // Implement the correct IsSubsetOf implementations
             impl<$($gen,)* S> SubsetOf<S> for Set<dyn $set<$($gen),*>>
+            where
+                S: $set<$($gen),*>
+            {}
+            impl<$($gen,)* S> SealedSubsetOf<S> for Set<dyn $set<$($gen),*>>
             where
                 S: $set<$($gen),*>
             {}
@@ -28,6 +32,8 @@ macro_rules! create_sets {
                     LOCK.get_or_init(|| [ $(TypeId::of::<$gen>()),* ])
                 }
             }
+            impl<$($gen: 'static,)*> SealedMembers for Set<dyn $set<$($gen),*>> {}
+
 
             impl<$($gen: 'static,)*> Debug for Set<dyn $set<$($gen),*>> {
                 fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -39,6 +45,7 @@ macro_rules! create_sets {
         )*
     };
 }
+
 create_sets!(
     0 Zero<>;
     1 One<T1>: Zero, Contains<T1>;
@@ -51,4 +58,6 @@ create_sets!(
     8 Eight<T1, T2, T3, T4, T5, T6, T7, T8>: Seven<T1, T2, T3, T4, T5, T6, T7>, Contains<T8>;
     9 Nine<T1, T2, T3, T4, T5, T6, T7, T8, T9>: Eight<T1, T2, T3, T4, T5, T6, T7, T8>, Contains<T9>;
     10 Ten<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>: Nine<T1, T2, T3, T4, T5, T6, T7, T8, T9>, Contains<T10>;
+    11 Eleven<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>: Ten<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, Contains<T11>;
+    12 Twelve<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>: Eleven<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, Contains<T12>;
 );
