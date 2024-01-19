@@ -1,6 +1,5 @@
 #![doc = include_str!("../README.md")]
 
-use private::*;
 use std::any::TypeId;
 
 mod set;
@@ -9,34 +8,21 @@ pub use set::*;
 /// Sets of types from 0 to 10 elements.
 pub mod sets;
 
-mod private {
-    pub trait SealedSupersetOf<T> {}
-    pub trait SealedSubsetOf<T> {}
-    pub trait SealedContains<T> {}
-    pub trait SealedMembers {}
-}
-
 //-------------------------------------
 // Contains
 //-------------------------------------
 
 /// Indicates that a set contains element `E`.
 ///
-/// This trait is sealed, implemente [`AsSet`] instead.
-pub trait Contains<E>: SealedContains<E> {}
+/// # Safety
+/// Implement [`AsSet`] instead.
+pub unsafe trait Contains<E> {}
 
 // Implement Contains for `Set<dyn ..>`
-impl<T: ?Sized, E> Contains<E> for Set<T> where T: Contains<E> {}
-impl<T: ?Sized, E> SealedContains<E> for Set<T> where T: Contains<E> {}
+unsafe impl<T: ?Sized, E> Contains<E> for Set<T> where T: Contains<E> {}
 
 // Implement Contains for `impl AsSet`
-impl<T, E> Contains<E> for T
-where
-    T: AsSet,
-    T::Set: Contains<E>,
-{
-}
-impl<T, E> SealedContains<E> for T
+unsafe impl<T, E> Contains<E> for T
 where
     T: AsSet,
     T::Set: Contains<E>,
@@ -49,14 +35,15 @@ where
 
 /// Trait to get the members (type-ids) of a set.
 ///
-/// This trait is sealed, implement [`AsSet`] instead.
-pub trait Members: SealedMembers {
+/// # Safety
+/// Implement [`AsSet`] instead.
+pub unsafe trait Members {
     /// Get the members (type-ids) of this set.
     fn members() -> &'static [TypeId];
 }
 
 // Implement Members for `impl AsSet`
-impl<T> Members for T
+unsafe impl<T> Members for T
 where
     T: AsSet,
 {
@@ -64,25 +51,19 @@ where
         <T::Set as Members>::members()
     }
 }
-impl<T> SealedMembers for T where T: AsSet {}
 
 //-------------------------------------
 // SubsetOf
 //-------------------------------------
 
 /// Implemented if set is a subset of `S`.
-///
-/// This trait is sealed, implement [`AsSet`] instead.
-pub trait SubsetOf<S>: SealedSubsetOf<S> {}
+/// 
+/// # Safety
+/// Implement [`AsSet`] instead.
+pub unsafe trait SubsetOf<S> {}
 
 // Implement SubsetOf for `impl AsSet`
-impl<T, S> SubsetOf<S> for T
-where
-    T: AsSet,
-    T::Set: SubsetOf<S>,
-{
-}
-impl<T, S> SealedSubsetOf<S> for T
+unsafe impl<T, S> SubsetOf<S> for T
 where
     T: AsSet,
     T::Set: SubsetOf<S>,
@@ -95,12 +76,12 @@ where
 
 /// Implemented if set is a superset of `S`.
 ///
-/// This trait is sealed, implement [`AsSet`] instead.
-pub trait SupersetOf<S>: SealedSupersetOf<S> {}
+/// # Safety
+/// Implement [`AsSet`] instead.
+pub unsafe trait SupersetOf<S> {}
 
 // Implement SupersetOf for `impl AsSet`
-impl<T, S> SupersetOf<S> for T where S: SubsetOf<T> {}
-impl<T, S> SealedSupersetOf<S> for T where S: SubsetOf<T> {}
+unsafe impl<T, S> SupersetOf<S> for T where S: SubsetOf<T> {}
 
 //-------------------------------------
 // AsSet

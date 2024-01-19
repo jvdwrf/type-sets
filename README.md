@@ -3,7 +3,7 @@ Sets implemented in the rust type-system.
 [![Crates.io](https://img.shields.io/crates/v/type-sets)](https://crates.io/crates/type-sets)
 [![Documentation](https://docs.rs/type-sets/badge.svg)](https://docs.rs/type-sets)
 
-This crate allows you to create sets of types in the rust type-system. These sets can be compared using `SubsetOf` and `SupersetOf`. All traits are sealed, except for [`AsSet`], giving guarantees that users cannot implement conflicting implementations themselves.
+This crate allows you to create sets of types in the rust type-system. These sets can be compared using `SubsetOf` and `SupersetOf`. All traits are unsafe, except for [`AsSet`], giving guarantees that users cannot implement conflicting implementations themselves.
 
 Sets are implemented up to 12 items.
 

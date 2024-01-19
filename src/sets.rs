@@ -16,23 +16,18 @@ macro_rules! create_sets {
             impl<$($gen,)* S: ?Sized> $set<$($gen),*> for S where S: $($sub_sets +)* {}
 
             // Implement the correct IsSubsetOf implementations
-            impl<$($gen,)* S> SubsetOf<S> for Set<dyn $set<$($gen),*>>
-            where
-                S: $set<$($gen),*>
-            {}
-            impl<$($gen,)* S> SealedSubsetOf<S> for Set<dyn $set<$($gen),*>>
+            unsafe impl<$($gen,)* S> SubsetOf<S> for Set<dyn $set<$($gen),*>>
             where
                 S: $set<$($gen),*>
             {}
 
-            impl<$($gen: 'static,)*> Members for Set<dyn $set<$($gen),*>>
+            unsafe impl<$($gen: 'static,)*> Members for Set<dyn $set<$($gen),*>>
             {
                 fn members() -> &'static [TypeId] {
                     static LOCK: OnceLock<[TypeId; $n]> = OnceLock::new();
                     LOCK.get_or_init(|| [ $(TypeId::of::<$gen>()),* ])
                 }
             }
-            impl<$($gen: 'static,)*> SealedMembers for Set<dyn $set<$($gen),*>> {}
 
 
             impl<$($gen: 'static,)*> Debug for Set<dyn $set<$($gen),*>> {
