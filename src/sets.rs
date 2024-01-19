@@ -1,5 +1,5 @@
 use crate::*;
-use std::{any::TypeId, fmt::Debug, sync::OnceLock};
+use std::{any::TypeId, sync::OnceLock};
 
 macro_rules! create_sets {
     ($(
@@ -27,14 +27,21 @@ macro_rules! create_sets {
                     static LOCK: OnceLock<[TypeId; $n]> = OnceLock::new();
                     LOCK.get_or_init(|| [ $(TypeId::of::<$gen>()),* ])
                 }
+
             }
 
+            impl<$($gen,)*> Set<dyn $set<$($gen),*>> {
+                pub fn pretty_str() -> String {
+                    let mut string = String::with_capacity($n * 25);
 
-            impl<$($gen: 'static,)*> Debug for Set<dyn $set<$($gen),*>> {
-                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                    f.debug_struct(stringify!($set))
-                        $(.field(stringify!($gen), &std::any::type_name::<$gen>()))*
-                        .finish()
+                    string.push_str("Set![");
+                    $(
+                        string.push_str(&std::any::type_name::<$gen>());
+                        string.push_str(", ");
+                    )*
+                    string.push(']');
+
+                    string
                 }
             }
         )*

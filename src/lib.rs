@@ -5,17 +5,17 @@ use std::any::TypeId;
 mod set;
 pub use set::*;
 
-/// Sets of types from 0 to 10 elements.
+/// Sets from 0 to 10 elements.
 pub mod sets;
 
 //-------------------------------------
 // Contains
 //-------------------------------------
 
-/// Indicates that a set contains element `E`.
+/// Implemented if a set contains the element `E`.
 ///
 /// # Safety
-/// Implement [`AsSet`] instead.
+/// Implementing this is unsafe, for custom set-types, implement [`AsSet`] instead.
 pub unsafe trait Contains<E> {}
 
 // Implement Contains for `Set<dyn ..>`
@@ -36,7 +36,7 @@ where
 /// Trait to get the members (type-ids) of a set.
 ///
 /// # Safety
-/// Implement [`AsSet`] instead.
+/// Implementing this is unsafe, for custom set-types, implement [`AsSet`] instead.
 pub unsafe trait Members {
     /// Get the members (type-ids) of this set.
     fn members() -> &'static [TypeId];
@@ -56,10 +56,10 @@ where
 // SubsetOf
 //-------------------------------------
 
-/// Implemented if set is a subset of `S`.
-/// 
+/// Implemented a set is a subset of `S`.
+///
 /// # Safety
-/// Implement [`AsSet`] instead.
+/// Implementing this is unsafe, for custom set-types, implement [`AsSet`] instead.
 pub unsafe trait SubsetOf<S> {}
 
 // Implement SubsetOf for `impl AsSet`
@@ -74,10 +74,10 @@ where
 // SupersetOf
 //-------------------------------------
 
-/// Implemented if set is a superset of `S`.
+/// Implemented if a set is a superset of `S`.
 ///
 /// # Safety
-/// Implement [`AsSet`] instead.
+/// Implementing this is unsafe, for custom set-types, implement [`AsSet`] instead.
 pub unsafe trait SupersetOf<S> {}
 
 // Implement SupersetOf for `impl AsSet`

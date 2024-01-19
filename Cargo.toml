@@ -1,6 +1,6 @@
 [package]
 name = "type-sets"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 keywords = ["type-system", "sets", "type-sets", "type-level", "type"]
@@ -11,3 +11,5 @@ repository = "https://github.com/jvdwrf/type-sets"
 readme = "README.md"
 
 [dependencies]
+phf = "0.11.0"
+csf = "0.1"

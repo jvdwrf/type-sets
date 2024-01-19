@@ -2,9 +2,10 @@ use std::marker::PhantomData;
 
 /// Marker struct to act as a set of elements.
 ///
-/// Usually created using the [`macro@Set`] macro.
+/// Use the [`macro@Set`] macro instead of typing this out directly.
 ///
-/// The inner type `T` is usually one of the [`sets`]:
+/// The inner type `T` is one of the [`sets`](crate::sets), and indicates the
+/// elements in this set.
 /// - `Set![]` == `Set<dyn Zero>`
 /// - `Set![u32]` == `Set<dyn One<u32>>`
 /// - `Set![u32, u64]` == `Set<dyn Two<u32, u64>>`
@@ -16,6 +17,8 @@ pub struct Set<T: ?Sized>(PhantomData<fn() -> T>);
 /// - `Set![]` == `Set<dyn Zero>`
 /// - `Set![u32]` == `Set<dyn One<u32>>`
 /// - `Set![u32, u64]` == `Set<dyn Two<u32, u64>>`
+/// 
+/// This macro works for up to 12 types.
 #[macro_export]
 macro_rules! Set {
     ($(,)?) => {

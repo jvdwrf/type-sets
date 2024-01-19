@@ -12,6 +12,7 @@ This library was created for use in [`meslin`](https://github.com/jvdwrf/Meslin)
 ## Example
 ```rust
 use type_sets::*;
+use std::any::TypeId;
 
 // We can define functions, that may only be called if the parameter `T` is
 // a subset or superset of another set.
@@ -27,11 +28,13 @@ impl AsSet for MySet {
 
 fn main() {
     is_subset::<Set![u32, u64]>(); // compiles
-    is_subset::<Set![u32]>(); // compiles
+    is_subset::<Set![u64, u32]>(); // compiles
+    is_subset::<Set![u32]>();
     // is_subset::<Set![u32, u64, u32]>(); // does not compile
 
     is_superset::<Set![u32, u64]>(); // compiles
     is_superset::<Set![u32, u64, u128]>(); // compiles
+    is_superset::<Set![u128, u32, u64, u32, u32, u32]>(); // compiles
     // is_superset::<Set![u32]>(); // does not compile
 
     is_subset::<MySet>(); // compiles
@@ -39,5 +42,14 @@ fn main() {
 
     contains_u64::<Set![u64]>();
     // contains_u64::<Set![u32]>(); // does not compile
+
+    assert_eq!(
+        <Set![u64, u32]>::members(), 
+        [TypeId::of::<u64>(), TypeId::of::<u32>()]
+    );
+    assert_eq!(
+        MySet::members(),
+        [TypeId::of::<u32>()]
+    );
 }
 ```
