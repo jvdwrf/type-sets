@@ -39,7 +39,7 @@ where
 /// Implementing this is unsafe, for custom set-types, implement [`AsSet`] instead.
 pub unsafe trait Members {
     /// Get the members (type-ids) of this set.
-    fn members() -> &'static [TypeId];
+    fn members() -> Vec<TypeId>;
 }
 
 // Implement Members for `impl AsSet`
@@ -47,7 +47,7 @@ unsafe impl<T> Members for T
 where
     T: AsSet,
 {
-    fn members() -> &'static [TypeId] {
+    fn members() -> Vec<TypeId> {
         <T::Set as Members>::members()
     }
 }

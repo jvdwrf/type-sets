@@ -23,25 +23,8 @@ macro_rules! create_sets {
 
             unsafe impl<$($gen: 'static,)*> Members for Set<dyn $set<$($gen),*>>
             {
-                fn members() -> &'static [TypeId] {
-                    static LOCK: OnceLock<[TypeId; $n]> = OnceLock::new();
-                    LOCK.get_or_init(|| [ $(TypeId::of::<$gen>()),* ])
-                }
-
-            }
-
-            impl<$($gen,)*> Set<dyn $set<$($gen),*>> {
-                pub fn pretty_str() -> String {
-                    let mut string = String::with_capacity($n * 25);
-
-                    string.push_str("Set![");
-                    $(
-                        string.push_str(&std::any::type_name::<$gen>());
-                        string.push_str(", ");
-                    )*
-                    string.push(']');
-
-                    string
+                fn members() -> Vec<TypeId> {
+                    vec![ $(TypeId::of::<$gen>()),* ]
                 }
             }
         )*
@@ -63,3 +46,28 @@ create_sets!(
     11 Eleven<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>: Ten<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>, Contains<T11>;
     12 Twelve<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>: Eleven<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>, Contains<T12>;
 );
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn members() {
+        assert_eq!(<Set![]>::members(), &[]);
+        assert_eq!(<Set![u8]>::members(), &[TypeId::of::<u8>()]);
+        assert_eq!(
+            <Set![u8, u16]>::members(),
+            &[TypeId::of::<u8>(), TypeId::of::<u16>()]
+        );
+        assert_eq!(
+            <Set![u8, u16, u32]>::members(),
+            &[TypeId::of::<u8>(), TypeId::of::<u16>(), TypeId::of::<u32>()]
+        );
+    }
+
+    #[test]
+    fn consequtive_members() {
+        assert_eq!(<Set![u32]>::members(), &[TypeId::of::<u32>()]);
+        assert_eq!(<Set![u8]>::members(), &[TypeId::of::<u8>()]);
+    }
+}

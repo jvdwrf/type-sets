@@ -1,6 +1,6 @@
 [package]
 name = "type-sets"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 keywords = ["type-system", "sets", "type-sets", "type-level", "type"]
